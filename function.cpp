@@ -1,5 +1,7 @@
 #include "function.h"
 
+using namespace std;
+
 int getinode(char *str)  
 {  
     struct stat st;  
@@ -46,3 +48,32 @@ void pwd()
     pwd();  
     printf("/%s",str);  
 }  
+
+
+
+void ls_short()
+{
+    DIR *dir;
+	dir = opendir(".");
+
+    vector<string> ls_names;
+
+    if(dir)
+    {
+       struct dirent* entry = readdir(dir);
+       while(entry)
+       {
+           ls_names.push_back(entry->d_name);
+           entry = readdir(dir);
+       }
+    }
+
+    sort(ls_names.begin(),ls_names.end());
+
+    for(auto iter = ls_names.begin(); iter != ls_names.end(); iter++)
+    {
+        puts(iter->c_str());
+    }
+
+    closedir(dir);
+}

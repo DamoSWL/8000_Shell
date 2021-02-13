@@ -48,6 +48,10 @@ void execute_cmd(Commands* commands)
                 pwd();
                 putchar('\n');
             }
+            else if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
+            {
+                ls_short();
+            }
         }
     }
 }

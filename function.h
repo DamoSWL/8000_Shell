@@ -9,13 +9,20 @@
 #include <stdlib.h>  
 #include <string.h>  
 #include <sys/types.h> 
-#include  <unistd.h>
+#include <unistd.h>
+#include <dirent.h>
+
+#include <string>
+#include <vector>
+#include <algorithm>
 
 
 
 int getinode(char *str);
 char *inode_to_name(int inode);
 void pwd();
+
+void ls_short();
 
 
 
