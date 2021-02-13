@@ -1,64 +1,57 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "util.h"
+#include <cstring>
+#include <cstdio>
+#include "function.h"
 
 using namespace std;
-static string command_list[100];
-
-void shell_loop(void);
-std::string read_line(void);
-void understand_line(string line);
-int execute(string command_list[100]);
 
 
 
 
-int main() {
+int main(int argc, char* argv[]) 
+{
 
-    //load config files
-    //Run the while loop
-    shell_loop();
-    //Cleanup
+    char* newCmd = new char[MAX_LENGTH];
+
+
+    while(1)
+    {
+        memset(newCmd,'\0',MAX_COUNT);
+        fgets(newCmd,MAX_LENGTH,stdin);
+        Commands* cmds = nullptr;
+        cmds = parse_cmd_line(newCmd);
+
+        execute_cmd(cmds);
+
+
+
+    }
+
     return 0;
 }
 
-void shell_loop(void){
-    string line;
-    int status ;
-    while(status !=0)
+void execute_cmd(Commands* commands)
+{
+    if(commands->cmd_count == 1)
     {
-        line = read_line();
-        understand_line(line);
-        status = execute(command_list);
+        if(commands->cmds[0]->argc == 0)
+        {
+            if(strncmp(commands->cmds[0]->cmd_name,"exit",strlen("exit")) == 0)
+            {
+                exit(0);
+            }
+            else if(strncmp(commands->cmds[0]->cmd_name,"pwd",strlen("pwd")) == 0)
+            {
+                pwd();
+                putchar('\n');
+            }
+        }
     }
 }
-string read_line(void){
-        string str;
-        cout << ">> ";
-        getline(cin, str);
-        return str;
-}
-void understand_line(string line){
 
-    string temp;
-    //static string command_list[100];
-    int i=0;
 
-    stringstream ss(line);
-    while(getline(ss, temp, ' ')){
-        command_list[i] = temp;
-        cout<<command_list[i]<<endl;
-        i++;
-    }
 
-}
 
-int execute(string command_list[100]) {
-    int i;
-
-    //exit function
-    if (command_list[0].compare("0") == 0) {
-        return 0;
-    }
-    return 1;
-}
