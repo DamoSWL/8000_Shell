@@ -77,3 +77,30 @@ void ls_short()
 
     closedir(dir);
 }
+
+void ls_with_r()
+{   
+    DIR *dir;
+	dir = opendir(".");
+
+    vector<string> ls_names;
+
+    if(dir)
+    {
+       struct dirent* entry = readdir(dir);
+       while(entry)
+       {
+           ls_names.push_back(entry->d_name);
+           entry = readdir(dir);
+       }
+    }
+
+    sort(ls_names.begin(),ls_names.end());
+
+    for(auto iter = ls_names.rbegin(); iter != ls_names.rend(); iter++)
+    {
+        puts(iter->c_str());
+    }
+
+    closedir(dir);
+}

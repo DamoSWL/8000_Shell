@@ -20,8 +20,10 @@ typedef struct Commands
 	Command *cmds[MAX_COUNT];   
 }Commands;
 
+Commands* create_commands();
+void reset_commands(Commands* cmds);
 
-Commands* parse_cmd_line(const char* cmdLine);
+void parse_cmd_line(const char* cmdLine, Commands* commands,int index);
 int pipeline_flag(const char* cmdLine);
 
 void execute_cmd(Commands* commands);
