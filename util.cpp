@@ -6,6 +6,15 @@
 
 using namespace std;
 
+/***********************************************************
+ * Function: create_commands
+ * 
+ * Description: create the container for the commands
+ * 
+ * Return: return the pointer to the container
+ * 
+ *
+ * ***********************************************************/
 
 Commands* create_commands()
 {
@@ -31,6 +40,18 @@ Commands* create_commands()
     return commands;
 }
 
+
+
+/***********************************************************
+ * Function: reset_commands
+ * 
+ * Description: reset the contatiner
+ * 
+ * Input: return the pointer to the container
+ * 
+ *
+ * ***********************************************************/
+
 void reset_commands(Commands* cmds)
 {
     cmds->cmd_count = 0;
@@ -45,6 +66,16 @@ void reset_commands(Commands* cmds)
     }
 
 }
+
+/***********************************************************
+ * Function: pipeline_flag
+ * 
+ * Description: check whether the command line contain the pipeline
+ * 
+ * return : return 0 or 1
+ * 
+ *
+ * ***********************************************************/
 
 int pipeline_flag(const char* cmdLine)
 {
@@ -66,7 +97,17 @@ int pipeline_flag(const char* cmdLine)
     return flag;
 }
 
-
+/***********************************************************
+ * Function: parse_cmd_line
+ * 
+ * Description: parse the command line and store the command in the container
+ * 
+ * Input : @cmdLine, the original command line
+ *         @commands, the pointer to the container
+ *         @index, the index of position in the container to store the command
+ * 
+ *
+ * ***********************************************************/
 
 void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
 {
@@ -75,7 +116,7 @@ void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
     memset(cmd,'\0',MAX_LENGTH);
     strncpy(cmd,cmdLine,strlen(cmdLine));
 
-    if(pipeline_flag(cmdLine) == 0)
+    if(pipeline_flag(cmdLine) == 0)//if there is no pipeline meaning only one command 
     {
         int count = 0;
         char* tokens = strtok((char*)cmd," ");
@@ -86,7 +127,7 @@ void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
                   
         }
 
-        if(count == 1)
+        if(count == 1)  //if there is only one command  option
         {
             tokens = strtok((char*)cmd," ");
             commands->cmd_count = 1;
@@ -95,7 +136,7 @@ void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
 
 
         }
-        else
+        else  // multiple command options
         {
             memset(cmd,'\0',MAX_LENGTH);
             strncpy(cmd,cmdLine,strlen(cmdLine));

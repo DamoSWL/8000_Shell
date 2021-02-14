@@ -28,11 +28,6 @@
 
 
 
-
-
-int getinode(char *str);
-char *inode_to_name(int inode);
-
 void pwd();
 void ls_short();
 void ls_with_r();

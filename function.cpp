@@ -2,55 +2,23 @@
 
 using namespace std;
 
-int getinode(char *str)  
-{  
-    struct stat st;  
-    if(stat(str,&st) == -1){  
-        perror(str);  
-        exit(-1);  
-    }  
-    return st.st_ino;  
-}
- 
 
-char *inode_to_name(int inode)  
-{  
-    char *str;  
-    DIR *dirp;  
-    struct dirent *dirt;  
-    if((dirp = opendir(".")) == NULL){  
-        perror(".");  
-        exit(-1);  
-    }  
-    while((dirt = readdir(dirp)) != NULL)  
-    {  
-        if(dirt->d_ino == inode){  
-            str = (char *)malloc(strlen(dirt->d_name)*sizeof(char));  
-            strcpy(str,dirt->d_name);  
-            return str;  
-        }  
-    }  
-    perror(".");  
-    exit(-1);  
-}
 
 void pwd()  
 {  
-    int inode,up_inode;  
-    char *str;  
-    inode = getinode((char*)".");  
-    up_inode = getinode((char*)"..");  
-    chdir("..");  
-    str = inode_to_name(inode);  
-    if(inode == up_inode) {  
-        return;  
-    }  
-    pwd();  
-    printf("/%s",str);  
+    char* directory = get_current_dir_name();
+    write(STDOUT_FILENO,directory,strlen(directory));
 }  
 
 
-
+/***********************************************************
+ * Function: ls_short
+ * 
+ * Description: execute ls
+ * 
+ * 
+ *
+ * ***********************************************************/
 void ls_short()
 {
     DIR *dir;
@@ -80,6 +48,16 @@ void ls_short()
 
     closedir(dir);
 }
+
+
+/***********************************************************
+ * Function: ls_with_r
+ * 
+ * Description: execute ls -r
+ * 
+ * 
+ *
+ * ***********************************************************/
 
 void ls_with_r()
 {   
@@ -113,6 +91,15 @@ void ls_with_r()
 
     closedir(dir);
 }
+
+/***********************************************************
+ * Function: ls_with_l
+ * 
+ * Description: execute ls -l
+ * 
+ * 
+ *
+ * ***********************************************************/
 
 void ls_with_l()
 {
@@ -151,6 +138,16 @@ void ls_with_l()
 
 
 }
+
+/***********************************************************
+ * Function: ls_with_l_filename
+ * 
+ * Description: execute ls -r filename
+ * 
+ * Input: @filename
+ * 
+ *
+ * ***********************************************************/
 
 void ls_with_l_filename(const char* filename)
 {
@@ -227,6 +224,16 @@ void ls_with_l_filename(const char* filename)
 
 }
 
+/***********************************************************
+ * Function: ls_with_s
+ * 
+ * Description: execute ls -s
+ * 
+ * 
+ * 
+ *
+ * ***********************************************************/
+
 void ls_with_s()
 {
     DIR *dir;
@@ -264,6 +271,17 @@ void ls_with_s()
 }
 
 
+/***********************************************************
+ * Function: ls_with_s_filename
+ * 
+ * Description: execute ls -s filename
+ * 
+ * Input: @filename
+ * 
+ *
+ * ***********************************************************/
+
+
 void ls_with_s_filename(const char* filename)
 {
     struct stat st;
@@ -279,6 +297,17 @@ void ls_with_s_filename(const char* filename)
     snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);
     puts(buf);
 }
+
+
+/***********************************************************
+ * Function: ls_with_file_type
+ * 
+ * Description: execute ls --file_type extension
+ * 
+ * Input: @extension, the extension of the file
+ * 
+ *
+ * ***********************************************************/
 
 void ls_with_file_type(const char* extension)
 {

@@ -38,8 +38,8 @@ Quite the shell (Terminate).
 C++
 
 ## Contributors
-Shi, Weili  
-Sixiang Zhang
+Weili, Shi  
+Sixiang, Zhang
 
 ## How to run
 run the following command.  
