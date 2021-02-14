@@ -21,7 +21,7 @@ cd [directory]
 ‘~’, `..`, ‘/’ are valid (along with alphanumeric characters) and stand for traditional meaning.  
 pwd:
 ```bash
-cd [directory]
+pwd [OPTION]
 ```
 ls: 
 ```bash
