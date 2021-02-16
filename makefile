@@ -4,7 +4,7 @@ LD = g++
 
 
 SRCS = $(wildcard *.cpp)
-OBJS = $(patsubst %c, %o, $(SRCS))
+OBJS = $(patsubst %.cpp, %.o, $(SRCS))
 
 TARGET = shell
 
