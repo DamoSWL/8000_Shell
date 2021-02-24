@@ -5,7 +5,7 @@ using namespace std;
 
 
 void pwd()  
-{  
+{
     char* directory = get_current_dir_name();
     write(STDOUT_FILENO,directory,strlen(directory));
 }  
@@ -277,7 +277,7 @@ void ls_with_s()
  * Description: execute ls -s filename
  * 
  * Input: @filename
- * 
+ *
  *
  * ***********************************************************/
 
@@ -294,7 +294,7 @@ void ls_with_s_filename(const char* filename)
 
     char buf[MAX_LENGTH] = {'\0'};
 
-    snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);
+    snprintf(buf,MAX_LENGTH,"%lld\t%s",st.st_blocks,filename+2);//here
     puts(buf);
 }
 
@@ -345,5 +345,24 @@ void ls_with_file_type(const char* extension)
     for(auto iter = ls_names.rbegin(); iter != ls_names.rend(); iter++)
     {
         puts(iter->c_str());
+    }
+}
+
+/***********************************************************
+ * Function: Implement the CD(changing directory) command
+ *
+ * Description: execute cd[directory]
+ * I use default function in C++ library(chdir), for implementing the CD command
+ *
+ * ***********************************************************/
+void changing_directory(char* path){
+    if(chdir(path)>=0){
+        char buf[80];
+       // char* directory = get_current_dir_name();
+        getcwd(buf,sizeof(buf));
+        printf("Current directory is:%s\n",buf);
+    }
+    else{
+        printf("[ERROR]: cd '%s' : No such path\n",path);
     }
 }

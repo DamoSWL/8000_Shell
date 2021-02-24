@@ -85,6 +85,7 @@ int main(int argc, char* argv[])
        
         memset(newCmd,'\0',MAX_COUNT);
         print_prefix();
+        //fgets
         fgets(newCmd,MAX_LENGTH,stdin);
         parse_cmd_line(newCmd,cmds,0);
         execute_cmd(cmds);
@@ -124,6 +125,10 @@ void execute_cmd(Commands* commands)
             else if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)  // execute ls
             {
                 ls_short();
+            }
+            else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
+            {
+                changing_directory(commands->cmds[0]->argument[0]);
             }
         }
         else

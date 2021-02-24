@@ -31,6 +31,7 @@
 void pwd();
 void ls_short();
 void ls_with_r();
+void changing_directory(char* path);
 
 void ls_with_l();
 void ls_with_l_filename(const char* filename);
