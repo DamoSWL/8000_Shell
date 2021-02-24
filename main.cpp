@@ -17,13 +17,15 @@ using namespace std;
  * 
  *************************************************************************/
 
-void init_shell_path()
+int init_shell_path()
 {
 
     char* home_path = getenv("HOME");
     char shell_path[MAX_LENGTH] = {'\0'};
 
-    strncpy(shell_path,home_path,strlen(home_path));
+    int ret = 0;
+
+    //strncpy(shell_path,home_path,strlen(home_path));
     strncat(shell_path,"/csci-shell",strlen("/csci-shell"));
     
     DIR* dir = nullptr;
@@ -31,14 +33,24 @@ void init_shell_path()
     umask(0);
     if(!dir)
     {
-        mkdir(shell_path,0755);    
+      ret = mkdir(shell_path,0755);   
+      if(ret < 0)
+      {
+          perror("/csci-shell initialization fail:");
+          return ret;
+      } 
     }
 
     strncat(shell_path,"/home",strlen("/home"));
     dir = opendir(shell_path);
     if(!dir)
     {
-        mkdir(shell_path,0755);    
+        ret = mkdir(shell_path,0755);  
+        if(ret < 0)
+        {
+          perror("/csci-shell/home initialization fail:");
+          return ret;
+        }   
     }
 
     chdir(shell_path);
@@ -46,6 +58,8 @@ void init_shell_path()
     {
         closedir(dir);
     }
+
+    return ret;
 
 }
 
@@ -77,7 +91,10 @@ int main(int argc, char* argv[])
     char* newCmd = new char[MAX_LENGTH];
     Commands* cmds = create_commands();
 
-    init_shell_path();
+    if(init_shell_path() < 0)
+    {
+        return -1;
+    }
 
 
     while(1)
@@ -109,9 +126,9 @@ int main(int argc, char* argv[])
  * ***************************************************************/
 void execute_cmd(Commands* commands)
 {
-    if(commands->cmd_count == 1)
+    if(commands->cmd_count == 1)  //if there is only one command in the line, meaning no pipeline
     {
-        if(commands->cmds[0]->argc == 0)
+        if(commands->cmds[0]->argc == 0)  //if there is no argument for this command
         {
             if(strncmp(commands->cmds[0]->cmd_name,"exit",strlen("exit")) == 0)
             {
@@ -126,14 +143,10 @@ void execute_cmd(Commands* commands)
             {
                 ls_short();
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
-            {
-                char path[MAX_LENGTH]={'\0'};
-                strncpy(path,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
-                changing_directory(commands->cmds[0]->argument[1]);
-            }
+            
+ 
         }
-        else
+        else  // if there is a argument for the command
         {
             if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
             {
@@ -186,6 +199,12 @@ void execute_cmd(Commands* commands)
                     }
                     
                 }
+            }
+            else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
+            {
+                char path[MAX_LENGTH]={'\0'};
+                strncpy(path,commands->cmds[0]->argument[0],strlen(commands->cmds[0]->argument[0])-1);
+                changing_directory(path);
             }
         }
         

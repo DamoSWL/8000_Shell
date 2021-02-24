@@ -294,7 +294,7 @@ void ls_with_s_filename(const char* filename)
 
     char buf[MAX_LENGTH] = {'\0'};
 
-    snprintf(buf,MAX_LENGTH,"%lld\t%s",st.st_blocks,filename+2);//here
+    snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);//here
     puts(buf);
 }
 
@@ -355,14 +355,11 @@ void ls_with_file_type(const char* extension)
  * I use default function in C++ library(chdir), for implementing the CD command
  *
  * ***********************************************************/
-void changing_directory(char* path){
-    if(chdir(path)>=0){
-        char buf[80];
-       // char* directory = get_current_dir_name();
-        getcwd(buf,sizeof(buf));
-        printf("Current directory is:%s\n",buf);
+void changing_directory(char* path)
+{
+    if(chdir(path) < 0)
+    {
+        perror("cd: ");
     }
-    else{
-        printf("[ERROR]: cd '%s' : No such path\n",path);
-    }
+ 
 }
