@@ -128,7 +128,9 @@ void execute_cmd(Commands* commands)
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
             {
-                changing_directory(commands->cmds[0]->argument[0]);
+                char path[MAX_LENGTH]={'\0'};
+                strncpy(path,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
+                changing_directory(commands->cmds[0]->argument[1]);
             }
         }
         else
