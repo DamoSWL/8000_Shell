@@ -4,6 +4,12 @@
 #include "util.h"
 #include <cstring>
 #include <cstdio>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "function.h"
 
 using namespace std;
@@ -80,6 +86,7 @@ void print_prefix()
     char prefix[MAX_LENGTH] = {'\0'};
     snprintf(prefix,MAX_LENGTH,"%s@%s:%s$ ",user,"localhost",directory);
     write(STDOUT_FILENO,prefix,strlen(prefix));
+    
 
     
 }
@@ -87,6 +94,7 @@ void print_prefix()
 
 int main(int argc, char* argv[]) 
 {
+
 
     char* newCmd = new char[MAX_LENGTH];
     Commands* cmds = create_commands();
@@ -125,7 +133,14 @@ int main(int argc, char* argv[])
  *
  * ***************************************************************/
 void execute_cmd(Commands* commands)
-{
+{    
+    pid_t pid = -1; 
+
+    int redirect_type = 0;
+    int fd = -1;
+    redirect_type = is_redirection(commands);
+    
+
     if(commands->cmd_count == 1)  //if there is only one command in the line, meaning no pipeline
     {
         if(commands->cmds[0]->argc == 0)  //if there is no argument for this command
@@ -141,64 +156,29 @@ void execute_cmd(Commands* commands)
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)  // execute ls
             {
+
                 ls_short();
+                
             }
             
- 
         }
         else  // if there is a argument for the command
         {
             if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
             {
-                if(strncmp(commands->cmds[0]->argument[0],"-r",strlen("-r")) == 0)  //execute ls -r
+                pid = fork(); //create new process for the ls command
+                if(pid == 0)
                 {
-                    ls_with_r();
+                    if(redirect_type > 0)  //check if there is redirection
+                    {
+                        redirection(fd,redirect_type,commands);  //redirect the stdout to the file
+                        commands->cmds[0]->argc -= 2;
+                    }
+ 
+                    mul_ls(commands);
+                    exit(0);
                 }
-                else if(strncmp(commands->cmds[0]->argument[0],"-l",strlen("-l")) == 0)  
-                {
-                    if(commands->cmds[0]->argc == 1)
-                    {
-                        ls_with_l();  //execute ls -l
-                    }
-                    else if(commands->cmds[0]->argc == 2)
-                    {
-                        char filename[MAX_LENGTH] = {'\0'};
-                        strncpy(filename,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
-                        ls_with_l_filename(filename);  //execute ls -l filename
-                    }
-                    else{}
-                    
-                }
-                else if(strncmp(commands->cmds[0]->argument[0],"-s",strlen("-s")) == 0)
-                {
-                    if(commands->cmds[0]->argc == 1)
-                    {
-                        ls_with_s();  //execute ls -s 
-                    }
-                    else if(commands->cmds[0]->argc == 2)
-                    {
-                        char filename[MAX_LENGTH] = {'\0'};
-                        strncpy(filename,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
-                        ls_with_s_filename(filename);  //execute ls -s  filename
-                    }
-                    else{}
-                    
-                }
-                else if(strncmp(commands->cmds[0]->argument[0],"--file-type",strlen("--file-type")) == 0)
-                {
-                    if(commands->cmds[0]->argument[1][0] == '*' && commands->cmds[0]->argument[1][1] == '.' && strlen(commands->cmds[0]->argument[1])>2)
-                    {
-                        char extension[MAX_LENGTH] = {'\0'};
-                        strncpy(extension,commands->cmds[0]->argument[1]+2,strlen(commands->cmds[0]->argument[1])-3);
-                        ls_with_file_type(extension);  //execute ls --file-type extension
-                    }
-                    else
-                    {
-                        puts("invalid format of file extension");
-                        return;
-                    }
-                    
-                }
+                
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
             {
@@ -206,9 +186,17 @@ void execute_cmd(Commands* commands)
                 strncpy(path,commands->cmds[0]->argument[0],strlen(commands->cmds[0]->argument[0])-1);
                 changing_directory(path);
             }
+
+
+           
         }
         
     }
+    wait(NULL);
+
+
+
+   
 }
 
 

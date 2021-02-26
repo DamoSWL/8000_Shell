@@ -39,6 +39,10 @@ void ls_with_l_filename(const char* filename);
 void ls_with_s();
 void ls_with_s_filename(const char* filename);
 void ls_with_file_type(const char* extension);
+void mul_ls(Commands* commands);
+
+int is_redirection(Commands* cmd);
+int redirection(int fd,int type,Commands* cmd);
 
 
 

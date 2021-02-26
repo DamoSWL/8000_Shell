@@ -1,4 +1,8 @@
 #include "function.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -349,6 +353,79 @@ void ls_with_file_type(const char* extension)
 }
 
 /***********************************************************
+ * Function: mul_ls
+ * 
+ * Description: execute ls command with multiple arguments
+ * 
+ * 
+ * 
+ *
+ * ***********************************************************/
+
+void mul_ls(Commands* commands)
+{
+    if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
+    {
+        if(strncmp(commands->cmds[0]->argument[0],"-r",strlen("-r")) == 0)  //execute ls -r
+        {
+            ls_with_r();
+        }
+        else if(strncmp(commands->cmds[0]->argument[0],"-l",strlen("-l")) == 0)  
+        {
+            if(commands->cmds[0]->argc == 1)
+            {
+                ls_with_l();  //execute ls -l
+            }
+            else if(commands->cmds[0]->argc == 2)
+            {
+                char filename[MAX_LENGTH] = {'\0'};
+                strncpy(filename,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
+                ls_with_l_filename(filename);  //execute ls -l filename
+            }
+            else{}
+            
+        }
+        else if(strncmp(commands->cmds[0]->argument[0],"-s",strlen("-s")) == 0)
+        {
+            if(commands->cmds[0]->argc == 1)
+            {
+                ls_with_s();  //execute ls -s 
+            }
+            else if(commands->cmds[0]->argc == 2)
+            {
+                char filename[MAX_LENGTH] = {'\0'};
+                strncpy(filename,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
+                ls_with_s_filename(filename);  //execute ls -s  filename
+            }
+            else{}
+            
+        }
+        else if(strncmp(commands->cmds[0]->argument[0],"--file-type",strlen("--file-type")) == 0)
+        {
+            if(commands->cmds[0]->argument[1][0] == '*' && commands->cmds[0]->argument[1][1] == '.' && strlen(commands->cmds[0]->argument[1])>2)
+            {
+                char extension[MAX_LENGTH] = {'\0'};
+                strncpy(extension,commands->cmds[0]->argument[1]+2,strlen(commands->cmds[0]->argument[1])-3);
+                ls_with_file_type(extension);  //execute ls --file-type extension
+            }
+            else
+            {
+                puts("invalid format of file extension");
+                return;
+            }
+            
+        }
+        else
+        {
+            ls_short();
+            
+        }
+    }
+}
+
+
+
+/***********************************************************
  * Function: Implement the CD(changing directory) command
  *
  * Description: execute cd[directory]
@@ -362,4 +439,70 @@ void changing_directory(char* path)
         perror("cd: ");
     }
  
+}
+
+/***********************************************************
+ * Function: is_redirection
+ *
+ * Description: verify if there is redirection operator in the command
+ * 
+ *
+ * ***********************************************************/
+
+int is_redirection(Commands* cmds)
+{
+    int num_arg = cmds->cmds[0]->argc;
+    if(cmds->cmds[0]->argc >= 2)
+    {
+        if(strncmp(cmds->cmds[0]->argument[num_arg - 2],">>",2) == 0)
+        {
+            return APPEND_REDIRECT;
+        }
+        else if(strncmp(cmds->cmds[0]->argument[num_arg - 2],">",1) == 0)
+        {
+            return TRUNC_REDIRECT;
+        }
+        else{}
+    }
+
+    return -1;
+}
+
+/***********************************************************
+ * Function: redirection
+ *
+ * Description: redirect the stdout to the designated file
+ * 
+ *
+ * ***********************************************************/
+
+int redirection(int fd,int type,Commands* cmds)
+{
+    char file[MAX_LENGTH] = {'\0'};
+    int num_argc = cmds->cmds[0]->argc;
+    strncpy(file,cmds->cmds[0]->argument[num_argc-1],strlen(cmds->cmds[0]->argument[num_argc-1])-1);
+
+    if(type == APPEND_REDIRECT)
+    {
+        fd = open(file,O_WRONLY|O_CREAT|O_APPEND,0664);
+        if(fd < 0)
+        {
+            perror("open: ");
+            return -1;
+        }
+    }
+    else if(type == TRUNC_REDIRECT)
+    {
+        fd = open(file,O_WRONLY|O_CREAT|O_TRUNC,0664);
+        if(fd < 0)
+        {
+            perror("open: ");
+            return -1;
+        }
+    }
+    else{}
+
+    dup2(fd,STDOUT_FILENO);
+    return 0;
+
 }

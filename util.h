@@ -5,6 +5,9 @@
 #define MAX_COUNT 10
 #define MAX_LENGTH 1024
 
+#define APPEND_REDIRECT  1
+#define TRUNC_REDIRECT 2
+
 // data structure for single command
 typedef struct Command 
 {		   
