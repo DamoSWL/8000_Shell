@@ -6,7 +6,7 @@
 
 using namespace std;
 
-
+extern vector<string> all_commands;
 
 void pwd()  
 {
@@ -25,7 +25,7 @@ void pwd()
  * ***********************************************************/
 void ls_short()
 {
-    DIR *dir;
+    DIR *dir = nullptr;
 	dir = opendir(".");
 
     vector<string> ls_names;
@@ -65,7 +65,7 @@ void ls_short()
 
 void ls_with_r()
 {   
-    DIR *dir;
+    DIR *dir = nullptr;
 	dir = opendir(".");
 
     vector<string> ls_names;
@@ -107,7 +107,7 @@ void ls_with_r()
 
 void ls_with_l()
 {
-    DIR *dir;
+    DIR *dir = nullptr;
 	dir = opendir(".");
 
     vector<string> ls_names;
@@ -240,7 +240,7 @@ void ls_with_l_filename(const char* filename)
 
 void ls_with_s()
 {
-    DIR *dir;
+    DIR *dir = nullptr;
 	dir = opendir(".");
 
     vector<string> ls_names;
@@ -315,7 +315,7 @@ void ls_with_s_filename(const char* filename)
 
 void ls_with_file_type(const char* extension)
 {
-    DIR *dir;
+    DIR *dir = nullptr;
 	dir = opendir(".");
 
     int len_ext = strlen(extension);
@@ -462,6 +462,10 @@ int is_redirection(Commands* cmds)
         {
             return TRUNC_REDIRECT;
         }
+        else if(strncmp(cmds->cmds[0]->argument[num_arg - 2],"<",1) == 0) 
+        {
+            return INPUT_REDIRECT;
+        }
         else{}
     }
 
@@ -500,9 +504,84 @@ int redirection(int fd,int type,Commands* cmds)
             return -1;
         }
     }
+    else if(type == INPUT_REDIRECT)
+    {
+        fd = open(file,O_RDONLY);
+        if(fd < 0)
+        {
+            perror("open: ");
+            return -1;
+        }
+    }
     else{}
-
-    dup2(fd,STDOUT_FILENO);
+    
+    if(type == INPUT_REDIRECT)
+    {
+        dup2(fd,STDIN_FILENO);
+    }
+    else
+    {
+        dup2(fd,STDOUT_FILENO);
+    }
+    
+    
     return 0;
 
+}
+
+char* redirect_from_file(Commands* cmds,char* option)
+{
+    pid_t pid = fork();
+    if(pid == 0)
+    {
+        int fd = -1;
+        redirection(fd,INPUT_REDIRECT,cmds);
+        fgets(option,MAX_LENGTH,stdin);
+
+        exit(0);
+    }
+
+    wait(NULL);
+    return option;         
+}
+
+char* redirect_cmd(char* old_cmd,char* option,Commands* cmds)
+{
+    char file[MAX_LENGTH] = {'\0'};
+    int num_argc = cmds->cmds[0]->argc;
+    strncpy(file,cmds->cmds[0]->argument[num_argc-1],strlen(cmds->cmds[0]->argument[num_argc-1])-1);
+
+    int fd = open(file,O_RDONLY);
+    if(fd > 0)
+    {
+        read(fd,option,MAX_LENGTH);
+    }
+    close(fd);
+
+    int i = 0;
+    char tmpCmd[MAX_LENGTH] = {'\0'};
+    for(; i < strlen(old_cmd); i++)
+    {
+        if(old_cmd[i] == '<')
+        {
+            break;
+        }
+
+    }
+
+    strncpy(tmpCmd,old_cmd,i);
+    strncat(tmpCmd,option,strlen(option));
+
+    reset_commands(cmds);
+    parse_cmd_line(tmpCmd,cmds,0);
+
+
+}
+
+void history()
+{
+    for(auto iter = all_commands.rbegin(); iter != all_commands.rend();iter++)
+    {
+        puts(iter->c_str());
+    }
 }

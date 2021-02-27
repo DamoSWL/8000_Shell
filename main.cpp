@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <vector>
 #include "function.h"
 
 using namespace std;
@@ -91,6 +92,8 @@ void print_prefix()
     
 }
 
+vector<string> all_commands;
+
 
 int main(int argc, char* argv[]) 
 {
@@ -112,8 +115,22 @@ int main(int argc, char* argv[])
         print_prefix();
         //fgets
         fgets(newCmd,MAX_LENGTH,stdin);
+        
         parse_cmd_line(newCmd,cmds,0);
-        execute_cmd(cmds);
+
+        if(is_redirection(cmds) == INPUT_REDIRECT) //verify if there is input redirection
+        {
+            char option[MAX_LENGTH] = {'\0'};
+            redirect_from_file(cmds,option);  //obtain the option from redirected file
+            redirect_cmd(newCmd,option,cmds);  //formulate new cmd
+        }
+
+        
+        if(execute_cmd(cmds) > 0)
+        {
+            newCmd[strlen(newCmd) - 1] = '\0';
+            all_commands.push_back(newCmd);
+        }
 
         reset_commands(cmds);
         
@@ -132,13 +149,14 @@ int main(int argc, char* argv[])
  * 
  *
  * ***************************************************************/
-void execute_cmd(Commands* commands)
+int execute_cmd(Commands* commands)
 {    
     pid_t pid = -1; 
 
     int redirect_type = 0;
     int fd = -1;
     redirect_type = is_redirection(commands);
+    int exe_flag = -1;
     
 
     if(commands->cmd_count == 1)  //if there is only one command in the line, meaning no pipeline
@@ -147,18 +165,26 @@ void execute_cmd(Commands* commands)
         {
             if(strncmp(commands->cmds[0]->cmd_name,"exit",strlen("exit")) == 0)
             {
+                exe_flag = 1;
                 exit(0);
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"pwd",strlen("pwd")) == 0)
             {
                 pwd();
                 putchar('\n');
+                exe_flag = 1;
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)  // execute ls
             {
 
                 ls_short();
+                exe_flag = 1;
                 
+            }
+            else if(strncmp(commands->cmds[0]->cmd_name,"history",strlen("history")) == 0)
+            {
+                history();
+                exe_flag = 1;
             }
             
         }
@@ -166,6 +192,7 @@ void execute_cmd(Commands* commands)
         {
             if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
             {
+                exe_flag = 1;
                 pid = fork(); //create new process for the ls command
                 if(pid == 0)
                 {
@@ -185,6 +212,21 @@ void execute_cmd(Commands* commands)
                 char path[MAX_LENGTH]={'\0'};
                 strncpy(path,commands->cmds[0]->argument[0],strlen(commands->cmds[0]->argument[0])-1);
                 changing_directory(path);
+                exe_flag = 1;
+            }
+            else if(strncmp(commands->cmds[0]->cmd_name,"history",strlen("history")) == 0)
+            {
+                exe_flag = 1;
+                pid = fork();
+                if(pid == 0)
+                {
+                    if(redirect_type > 0)
+                    {
+                        redirection(fd,redirect_type,commands);                        
+                    }
+                    history();
+                    exit(0);
+                }
             }
 
 
@@ -194,9 +236,8 @@ void execute_cmd(Commands* commands)
     }
     wait(NULL);
 
+    return exe_flag;
 
-
-   
 }
 
 

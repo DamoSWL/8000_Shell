@@ -5,6 +5,7 @@
 #define MAX_COUNT 10
 #define MAX_LENGTH 1024
 
+#define INPUT_REDIRECT 0
 #define APPEND_REDIRECT  1
 #define TRUNC_REDIRECT 2
 
@@ -29,7 +30,9 @@ void reset_commands(Commands* cmds);
 void parse_cmd_line(const char* cmdLine, Commands* commands,int index);
 int pipeline_flag(const char* cmdLine);
 
-void execute_cmd(Commands* commands);
+int execute_cmd(Commands* commands);
+
+
 
 
 #endif

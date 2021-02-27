@@ -11,20 +11,22 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <dirent.h>
-
+#include <vector>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include "util.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include<pwd.h>     
-#include<grp.h>    
-#include<time.h>
-#include<string.h>
-#include<stdlib.h>
-#include<stdio.h>
+#include <unistd.h> 
+#include <pwd.h>     
+#include <grp.h>    
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/wait.h>
+
 
 
 
@@ -43,6 +45,10 @@ void mul_ls(Commands* commands);
 
 int is_redirection(Commands* cmd);
 int redirection(int fd,int type,Commands* cmd);
+char* redirect_from_file(Commands* cmds,char* option);
+char* redirect_cmd(char* old_cmd,char* option,Commands* cmd);
+
+void history();
 
 
 

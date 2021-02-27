@@ -3,6 +3,9 @@
 #include <cstdio>
 #include "util.h"
 #include <cstdlib>
+#include <sys/types.h>
+#include <unistd.h>
+
 
 using namespace std;
 
@@ -161,3 +164,4 @@ void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
     }
 
 }
+
