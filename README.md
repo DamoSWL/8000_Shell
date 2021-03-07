@@ -34,6 +34,32 @@ exit
 ```
 Quite the shell (Terminate).
 
+Find:
+```bash
+find path -name filename
+```
+for example,
+```bash
+find . -name a.txt
+```
+
+File Redirection(>,>>,<):
+```bash
+ls -l > a.txt
+ls -l >> a.txt
+ls -l < b.txt (in b.txt we have filename, for example ./shell)
+find . -name b.txt > a.txt
+```
+Service(&):
+```bash
+find . -name a.txt &
+```
+
+History:
+```bash
+history
+```
+
 ## Programming Language used
 C++
 

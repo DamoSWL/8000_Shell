@@ -587,8 +587,9 @@ void history()
 int is_service(Commands* cmd)
 {
     int num_options = cmd->cmds[0]->argc;
-    if(strncmp(cmd->cmds[0]->argument[num_options],"&",1) == 0)
+    if(strncmp(cmd->cmds[0]->argument[num_options-1],"&",1) == 0)
     {
+        cmd->cmds[0]->argc -= 1;
         return 1;
     }
 

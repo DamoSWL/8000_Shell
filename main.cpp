@@ -146,6 +146,10 @@ int execute_cmd(Commands* commands)
     int fd = -1;
     
     int exe_flag = -1;
+    int backen = 0;
+    pid_t backen_pid = 0;
+
+    backen = is_service(commands);
     
 
     if(commands->cmd_count == 1)  //if there is only one command in the line, meaning no pipeline
@@ -233,8 +237,14 @@ int execute_cmd(Commands* commands)
                     char filename[MAX_LENGTH] = {'\0'};
                     strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
                     find(commands->cmds[0]->argument[0],filename);
+                    exit(0);
 
                 }
+                else
+                {
+                   backen_pid = pid;
+                }
+                
             }
 
 
@@ -242,7 +252,15 @@ int execute_cmd(Commands* commands)
         }
         
     }
-    wait(NULL);
+    if(!backen)
+    {
+        wait(NULL);
+    }
+    else
+    {
+        printf("[1] %d\n",backen_pid);
+    }
+    
 
     return exe_flag;
 
