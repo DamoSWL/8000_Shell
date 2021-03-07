@@ -50,6 +50,8 @@ char* redirect_cmd(char* old_cmd,char* option,Commands* cmd);
 
 void history();
 
+int is_service(Commands* cmd);
 
+void find(char* path, char* filename);
 
 #endif

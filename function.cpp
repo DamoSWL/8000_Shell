@@ -146,7 +146,7 @@ void ls_with_l()
 /***********************************************************
  * Function: ls_with_l_filename
  * 
- * Description: execute ls -r filename
+ * Description: execute ls -l filename
  * 
  * Input: @filename
  * 
@@ -164,6 +164,7 @@ void ls_with_l_filename(const char* filename)
     }
 
     char perms[11] = {'\0'};
+
      
     switch( st.st_mode & S_IFMT )
     {
@@ -180,15 +181,12 @@ void ls_with_l_filename(const char* filename)
             perms[0] = 'b';
             break;
         case S_IFDIR:    
-
             perms[0] = 'd';
             break;
         case S_IFCHR:   
-
             perms[0] = 'c';
             break;
         case S_IFIFO:   
-
             perms[0] = 'p';
             break;
         default:
@@ -584,4 +582,59 @@ void history()
     {
         puts(iter->c_str());
     }
+}
+
+int is_service(Commands* cmd)
+{
+    int num_options = cmd->cmds[0]->argc;
+    if(strncmp(cmd->cmds[0]->argument[num_options],"&",1) == 0)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+void find(char* path, char* filename)
+{
+    DIR *dir = nullptr;
+	dir = opendir(path);
+
+    if(dir)
+    {
+      
+       struct dirent* entry = readdir(dir);
+       while(entry)
+       {
+           if(strncmp(entry->d_name,".",strlen(".")) != 0 && strncmp(entry->d_name,"..",strlen("..")) != 0)
+           {
+               char full_path[MAX_LENGTH] = {'\0'};
+               strncpy(full_path,path,strlen(path));
+               strncat(full_path,"/",1);
+               strncat(full_path,entry->d_name,strlen(entry->d_name));
+
+               struct stat st;
+               lstat(full_path,&st);
+
+       
+                if((st.st_mode & S_IFMT) == S_IFDIR)
+                {
+                   find(full_path,filename);
+                }
+                else
+                {
+                    if(strncmp(entry->d_name,filename,strlen(filename)) == 0)
+                    {
+                        puts(full_path);
+                    }
+                }
+ 
+           }
+
+           
+           entry = readdir(dir);
+       }
+    }
+
+    closedir(dir);
 }

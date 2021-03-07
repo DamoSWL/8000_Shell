@@ -98,7 +98,6 @@ vector<string> all_commands;
 int main(int argc, char* argv[]) 
 {
 
-
     char* newCmd = new char[MAX_LENGTH];
     Commands* cmds = create_commands();
 
@@ -106,24 +105,14 @@ int main(int argc, char* argv[])
     {
         return -1;
     }
-
-
+    
     while(1)
     {
        
         memset(newCmd,'\0',MAX_COUNT);
         print_prefix();
-        //fgets
-        fgets(newCmd,MAX_LENGTH,stdin);
-        
+        fgets(newCmd,MAX_LENGTH,stdin);        
         parse_cmd_line(newCmd,cmds,0);
-
-        if(is_redirection(cmds) == INPUT_REDIRECT) //verify if there is input redirection
-        {
-            char option[MAX_LENGTH] = {'\0'};
-            redirect_from_file(cmds,option);  //obtain the option from redirected file
-            redirect_cmd(newCmd,option,cmds);  //formulate new cmd
-        }
 
         
         if(execute_cmd(cmds) > 0)
@@ -155,12 +144,14 @@ int execute_cmd(Commands* commands)
 
     int redirect_type = 0;
     int fd = -1;
-    redirect_type = is_redirection(commands);
+    
     int exe_flag = -1;
     
 
     if(commands->cmd_count == 1)  //if there is only one command in the line, meaning no pipeline
     {
+        redirect_type = is_redirection(commands);
+
         if(commands->cmds[0]->argc == 0)  //if there is no argument for this command
         {
             if(strncmp(commands->cmds[0]->cmd_name,"exit",strlen("exit")) == 0)
@@ -226,6 +217,23 @@ int execute_cmd(Commands* commands)
                     }
                     history();
                     exit(0);
+                }
+            }
+            else if(strncmp(commands->cmds[0]->cmd_name,"find",strlen("find")) == 0)
+            {
+                
+                exe_flag = 1;
+                pid = fork();
+                if(pid == 0)
+                {
+                    if(redirect_type > 0)
+                    {
+                        redirection(fd,redirect_type,commands);  
+                    }
+                    char filename[MAX_LENGTH] = {'\0'};
+                    strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
+                    find(commands->cmds[0]->argument[0],filename);
+
                 }
             }
 
