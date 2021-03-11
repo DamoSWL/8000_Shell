@@ -162,6 +162,22 @@ void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
         }
     
     }
+    else
+    {
+        char single_cmd_1[MAX_LENGTH] = {'\0'};
+        char single_cmd_2[MAX_LENGTH] = {'\0'};
+
+        char* tokens = strtok((char*)cmd,"|");           
+        strncpy(single_cmd_1,tokens,strlen(tokens));
+
+        tokens = strtok(NULL, "|");   
+        strncpy(single_cmd_2,tokens,strlen(tokens));
+                  
+        parse_cmd_line(single_cmd_1,commands,0);
+        parse_cmd_line(single_cmd_2,commands,1);
+
+    }
+    
 
 }
 

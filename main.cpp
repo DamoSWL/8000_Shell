@@ -188,18 +188,23 @@ int execute_cmd(Commands* commands)
             if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
             {
                 exe_flag = 1;
-                pid = fork(); //create new process for the ls command
-                if(pid == 0)
-                {
-                    if(redirect_type > 0)  //check if there is redirection
+                if(redirect_type > 0)  //check if there is redirection
+                {              
+                    pid = fork(); //create new process for the ls command
+                    if(pid == 0)
                     {
+                                                
                         redirection(fd,redirect_type,commands);  //redirect the stdout to the file
-                        commands->cmds[0]->argc -= 2;
+                        commands->cmds[0]->argc -= 2;    
+                        mul_ls(commands);
+                        exit(0);
                     }
- 
-                    mul_ls(commands);
-                    exit(0);
                 }
+                else
+                {
+                    mul_ls(commands);
+                }
+                
                 
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
@@ -212,46 +217,76 @@ int execute_cmd(Commands* commands)
             else if(strncmp(commands->cmds[0]->cmd_name,"history",strlen("history")) == 0)
             {
                 exe_flag = 1;
-                pid = fork();
-                if(pid == 0)
-                {
-                    if(redirect_type > 0)
-                    {
+                if(redirect_type > 0)
+                {               
+                    pid = fork();
+                    if(pid == 0)
+                    {                                            
                         redirection(fd,redirect_type,commands);                        
+                        history();
+                        exit(0);
                     }
-                    history();
-                    exit(0);
                 }
+                else
+                {
+                    history();
+                }
+                
             }
             else if(strncmp(commands->cmds[0]->cmd_name,"find",strlen("find")) == 0)
             {
                 
                 exe_flag = 1;
-                pid = fork();
-                if(pid == 0)
+                if(redirect_type > 0)
                 {
-                    if(redirect_type > 0)
+                    pid = fork();
+                    if(pid == 0)
                     {
+                                            
                         redirection(fd,redirect_type,commands);  
-                    }
-                    char filename[MAX_LENGTH] = {'\0'};
-                    strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
-                    find(commands->cmds[0]->argument[0],filename);
-                    exit(0);
+                        
+                        char filename[MAX_LENGTH] = {'\0'};
+                        strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
+                        find(commands->cmds[0]->argument[0],filename);
+                        exit(0);
 
+                    }
                 }
                 else
                 {
-                   backen_pid = pid;
+                    char filename[MAX_LENGTH] = {'\0'};
+                    strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
+                    find(commands->cmds[0]->argument[0],filename);
                 }
-                
+
             }
 
-
-           
         }
         
     }
+    else
+    {
+         int fds[2]; // file descriptors
+         pipe(fds);
+
+         if(fork() == 0)  //command 1
+         {
+             dup2(fds[1], STDOUT_FILENO);
+             close(fds[0]);
+         }
+
+         if(fork() == 0)  //command 2
+         {
+             dup2(fds[0], STDIN_FILENO);
+             close(fds[1]);
+         }
+        
+
+    }
+    
+
+
+
     if(!backen)
     {
         wait(NULL);
