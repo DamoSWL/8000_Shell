@@ -111,13 +111,12 @@ int main(int argc, char* argv[])
        
         memset(newCmd,'\0',MAX_COUNT);
         print_prefix();
-        fgets(newCmd,MAX_LENGTH,stdin);        
+        fgets(newCmd,MAX_LENGTH,stdin);   
+        newCmd[strlen(newCmd)-1] = '\0';     
         parse_cmd_line(newCmd,cmds,0);
-
-        
-        if(execute_cmd(cmds) > 0)
+   
+        if(execute_cmd(cmds,0) > 0)
         {
-            newCmd[strlen(newCmd) - 1] = '\0';
             all_commands.push_back(newCmd);
         }
 
@@ -138,45 +137,45 @@ int main(int argc, char* argv[])
  * 
  *
  * ***************************************************************/
-int execute_cmd(Commands* commands)
+int execute_cmd(Commands* commands,int index)
 {    
-    pid_t pid = -1; 
-
-    int redirect_type = 0;
-    int fd = -1;
-    
     int exe_flag = -1;
-    int backen = 0;
-    pid_t backen_pid = 0;
-
-    backen = is_service(commands);
     
 
     if(commands->cmd_count == 1)  //if there is only one command in the line, meaning no pipeline
     {
+
+        pid_t pid = -1; 
+
+        int redirect_type = 0;
+        int fd = -1;      
+        
+        int backen = 0;
+
+        backen = is_service(commands);
         redirect_type = is_redirection(commands);
 
-        if(commands->cmds[0]->argc == 0)  //if there is no argument for this command
+        if(commands->cmds[index]->argc == 0)  //if there is no argument for this command
         {
-            if(strncmp(commands->cmds[0]->cmd_name,"exit",strlen("exit")) == 0)
+            if(strncmp(commands->cmds[index]->cmd_name,"exit",strlen("exit")) == 0)
             {
                 exe_flag = 1;
                 exit(0);
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"pwd",strlen("pwd")) == 0)
+            else if(strncmp(commands->cmds[index]->cmd_name,"pwd",strlen("pwd")) == 0)
             {
                 pwd();
                 putchar('\n');
                 exe_flag = 1;
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)  // execute ls
+            else if(strncmp(commands->cmds[index]->cmd_name,"ls",strlen("ls")) == 0)  // execute ls
             {
 
                 ls_short();
                 exe_flag = 1;
                 
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"history",strlen("history")) == 0)
+            else if(strncmp(commands->cmds[index]->cmd_name,"history",strlen("history")) == 0)
             {
                 history();
                 exe_flag = 1;
@@ -185,8 +184,9 @@ int execute_cmd(Commands* commands)
         }
         else  // if there is a argument for the command
         {
-            if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
+            if(strncmp(commands->cmds[index]->cmd_name,"ls",strlen("ls")) == 0)
             {
+
                 exe_flag = 1;
                 if(redirect_type > 0)  //check if there is redirection
                 {              
@@ -195,26 +195,46 @@ int execute_cmd(Commands* commands)
                     {
                                                 
                         redirection(fd,redirect_type,commands);  //redirect the stdout to the file
-                        commands->cmds[0]->argc -= 2;    
-                        mul_ls(commands);
-                        exit(0);
+                        commands->cmds[index]->argc -= 2;    
+                        mul_ls(commands,index);
+                        
                     }
                 }
                 else
                 {
-                    mul_ls(commands);
+                    if(backen > 0)
+                    {
+                        pid = fork();
+                        if(pid == 0)
+                        {
+                             mul_ls(commands,index);
+                            
+                        }
+                        else
+                        {
+                            printf("[1] %d\n",pid);
+                        }
+                        
+                    }
+                    else
+                    {
+                        mul_ls(commands,index);
+                    }
+                    
+                   
                 }
                 
                 
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
+            else if(strncmp(commands->cmds[index]->cmd_name,"cd",strlen("cd")) == 0)  //execute cd, changing directory
             {
                 char path[MAX_LENGTH]={'\0'};
-                strncpy(path,commands->cmds[0]->argument[0],strlen(commands->cmds[0]->argument[0])-1);
+                strncpy(path,commands->cmds[index]->argument[0],strlen(commands->cmds[index]->argument[0]));
+                puts(path);
                 changing_directory(path);
                 exe_flag = 1;
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"history",strlen("history")) == 0)
+            else if(strncmp(commands->cmds[index]->cmd_name,"history",strlen("history")) == 0)
             {
                 exe_flag = 1;
                 if(redirect_type > 0)
@@ -224,7 +244,7 @@ int execute_cmd(Commands* commands)
                     {                                            
                         redirection(fd,redirect_type,commands);                        
                         history();
-                        exit(0);
+                        
                     }
                 }
                 else
@@ -233,7 +253,7 @@ int execute_cmd(Commands* commands)
                 }
                 
             }
-            else if(strncmp(commands->cmds[0]->cmd_name,"find",strlen("find")) == 0)
+            else if(strncmp(commands->cmds[index]->cmd_name,"find",strlen("find")) == 0)
             {
                 
                 exe_flag = 1;
@@ -246,55 +266,96 @@ int execute_cmd(Commands* commands)
                         redirection(fd,redirect_type,commands);  
                         
                         char filename[MAX_LENGTH] = {'\0'};
-                        strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
-                        find(commands->cmds[0]->argument[0],filename);
-                        exit(0);
+                        strncpy(filename,commands->cmds[index]->argument[2],strlen(commands->cmds[index]->argument[2]));
+                        find(commands->cmds[index]->argument[0],filename);
+                        
 
                     }
                 }
                 else
                 {
                     char filename[MAX_LENGTH] = {'\0'};
-                    strncpy(filename,commands->cmds[0]->argument[2],strlen(commands->cmds[0]->argument[2])-1);
-                    find(commands->cmds[0]->argument[0],filename);
+                    strncpy(filename,commands->cmds[index]->argument[2],strlen(commands->cmds[index]->argument[2]));
+                    if(backen > 0)
+                    {
+                        pid = fork();
+                        if(pid == 0)
+                        {
+                            find(commands->cmds[index]->argument[0],filename);
+                        
+                        }
+                        else
+                        {
+
+                            printf("[1] %d\n",pid);                       
+                        }
+                        
+                    }
+                    else
+                    {
+                       find(commands->cmds[index]->argument[0],filename);
+                    }
+                    
+                    
                 }
 
             }
 
         }
+
+
+        if((pid > 0) && (backen != 1))
+        {
+            waitpid(pid,nullptr,0);
+        }
+        
         
     }
     else
     {
-         int fds[2]; // file descriptors
-         pipe(fds);
 
-         if(fork() == 0)  //command 1
-         {
+        exe_flag = 1;
+        int fds[2]; // file descriptors
+        pipe(fds);
+
+        pid_t pid_1 = -1;
+        pid_t pid_2 = -1;
+
+
+        pid_1=fork();
+        if(pid_1 == 0)  //command 1
+        {
              dup2(fds[1], STDOUT_FILENO);
              close(fds[0]);
-         }
+             commands->cmd_count = 1;
+             execute_cmd(commands,0);
+             close(fds[1]);
+             
+             
+        }
 
-         if(fork() == 0)  //command 2
-         {
+        pid_2 = fork();
+
+        if(pid_2 == 0)  //command 2
+        {
              dup2(fds[0], STDIN_FILENO);
              close(fds[1]);
-         }
+             commands->cmd_count = 1;
+             execute_cmd(commands,1);
+             close(fds[0]);
+             
+        }
+
+        close(fds[0]);
+        close(fds[1]);
+
+        waitpid(pid_1,nullptr,0);
+        waitpid(pid_2,nullptr,0);
         
 
     }
     
-
-
-
-    if(!backen)
-    {
-        wait(NULL);
-    }
-    else
-    {
-        printf("[1] %d\n",backen_pid);
-    }
+    
     
 
     return exe_flag;

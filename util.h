@@ -30,7 +30,7 @@ void reset_commands(Commands* cmds);
 void parse_cmd_line(const char* cmdLine, Commands* commands,int index);
 int pipeline_flag(const char* cmdLine);
 
-int execute_cmd(Commands* commands);
+int execute_cmd(Commands* commands,int index);
 
 
 

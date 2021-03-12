@@ -175,6 +175,7 @@ void parse_cmd_line(const char* cmdLine, Commands* commands,int index)
                   
         parse_cmd_line(single_cmd_1,commands,0);
         parse_cmd_line(single_cmd_2,commands,1);
+        commands->cmd_count = 2;
 
     }
     

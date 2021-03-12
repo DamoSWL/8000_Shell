@@ -360,50 +360,50 @@ void ls_with_file_type(const char* extension)
  *
  * ***********************************************************/
 
-void mul_ls(Commands* commands)
+void mul_ls(Commands* commands,int index)
 {
-    if(strncmp(commands->cmds[0]->cmd_name,"ls",strlen("ls")) == 0)
+    if(strncmp(commands->cmds[index]->cmd_name,"ls",strlen("ls")) == 0)
     {
-        if(strncmp(commands->cmds[0]->argument[0],"-r",strlen("-r")) == 0)  //execute ls -r
+        if(strncmp(commands->cmds[index]->argument[0],"-r",strlen("-r")) == 0)  //execute ls -r
         {
             ls_with_r();
         }
-        else if(strncmp(commands->cmds[0]->argument[0],"-l",strlen("-l")) == 0)  
+        else if(strncmp(commands->cmds[index]->argument[0],"-l",strlen("-l")) == 0)  
         {
-            if(commands->cmds[0]->argc == 1)
+            if(commands->cmds[index]->argc == 1)
             {
                 ls_with_l();  //execute ls -l
             }
-            else if(commands->cmds[0]->argc == 2)
+            else if(commands->cmds[index]->argc == 2)
             {
                 char filename[MAX_LENGTH] = {'\0'};
-                strncpy(filename,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
+                strncpy(filename,commands->cmds[index]->argument[1],strlen(commands->cmds[index]->argument[1]));
                 ls_with_l_filename(filename);  //execute ls -l filename
             }
             else{}
             
         }
-        else if(strncmp(commands->cmds[0]->argument[0],"-s",strlen("-s")) == 0)
+        else if(strncmp(commands->cmds[index]->argument[0],"-s",strlen("-s")) == 0)
         {
             if(commands->cmds[0]->argc == 1)
             {
                 ls_with_s();  //execute ls -s 
             }
-            else if(commands->cmds[0]->argc == 2)
+            else if(commands->cmds[index]->argc == 2)
             {
                 char filename[MAX_LENGTH] = {'\0'};
-                strncpy(filename,commands->cmds[0]->argument[1],strlen(commands->cmds[0]->argument[1])-1);
+                strncpy(filename,commands->cmds[index]->argument[1],strlen(commands->cmds[index]->argument[1]));
                 ls_with_s_filename(filename);  //execute ls -s  filename
             }
             else{}
             
         }
-        else if(strncmp(commands->cmds[0]->argument[0],"--file-type",strlen("--file-type")) == 0)
+        else if(strncmp(commands->cmds[index]->argument[0],"--file-type",strlen("--file-type")) == 0)
         {
-            if(commands->cmds[0]->argument[1][0] == '*' && commands->cmds[0]->argument[1][1] == '.' && strlen(commands->cmds[0]->argument[1])>2)
+            if(commands->cmds[index]->argument[1][0] == '*' && commands->cmds[index]->argument[1][1] == '.' && strlen(commands->cmds[index]->argument[1])>2)
             {
                 char extension[MAX_LENGTH] = {'\0'};
-                strncpy(extension,commands->cmds[0]->argument[1]+2,strlen(commands->cmds[0]->argument[1])-3);
+                strncpy(extension,commands->cmds[index]->argument[1]+2,strlen(commands->cmds[index]->argument[1])-2);
                 ls_with_file_type(extension);  //execute ls --file-type extension
             }
             else
@@ -418,6 +418,7 @@ void mul_ls(Commands* commands)
             ls_short();
             
         }
+
     }
 }
 
@@ -482,7 +483,7 @@ int redirection(int fd,int type,Commands* cmds)
 {
     char file[MAX_LENGTH] = {'\0'};
     int num_argc = cmds->cmds[0]->argc;
-    strncpy(file,cmds->cmds[0]->argument[num_argc-1],strlen(cmds->cmds[0]->argument[num_argc-1])-1);
+    strncpy(file,cmds->cmds[0]->argument[num_argc-1],strlen(cmds->cmds[0]->argument[num_argc-1]));
 
     if(type == APPEND_REDIRECT)
     {
@@ -536,10 +537,10 @@ char* redirect_from_file(Commands* cmds,char* option)
         redirection(fd,INPUT_REDIRECT,cmds);
         fgets(option,MAX_LENGTH,stdin);
 
-        exit(0);
+        
     }
 
-    wait(NULL);
+    waitpid(pid,nullptr,0);
     return option;         
 }
 
@@ -547,7 +548,7 @@ char* redirect_cmd(char* old_cmd,char* option,Commands* cmds)
 {
     char file[MAX_LENGTH] = {'\0'};
     int num_argc = cmds->cmds[0]->argc;
-    strncpy(file,cmds->cmds[0]->argument[num_argc-1],strlen(cmds->cmds[0]->argument[num_argc-1])-1);
+    strncpy(file,cmds->cmds[0]->argument[num_argc-1],strlen(cmds->cmds[0]->argument[num_argc-1]));
 
     int fd = open(file,O_RDONLY);
     if(fd > 0)
