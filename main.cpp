@@ -7,12 +7,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <vector>
 #include <regex>
 #include "function.h"
+#include <signal.h>
 
 using namespace std;
 
@@ -94,7 +94,18 @@ void print_prefix()
 }
 
 vector<string> all_commands;
+vector<int> all_pids;
 
+
+void signal_handler(int signal)
+{
+    if(signal == SIGINT)
+    {
+        for (auto iter = all_pids.cbegin(); iter != all_pids.cend();iter++)
+        kill(*iter,SIGTERM);
+        all_pids.clear();
+    }
+}
 
 int main(int argc, char* argv[]) 
 {
@@ -106,6 +117,8 @@ int main(int argc, char* argv[])
     {
         return -1;
     }
+
+    signal(SIGINT,signal_handler);
     
     while(1)
     {
@@ -113,14 +126,18 @@ int main(int argc, char* argv[])
         memset(newCmd,'\0',MAX_COUNT);
         print_prefix();
         fgets(newCmd,MAX_LENGTH,stdin);   
-        newCmd[strlen(newCmd)-1] = '\0';     
-        parse_cmd_line(newCmd,cmds,0);
-   
-        if(execute_cmd(cmds,0) > 0)
+        newCmd[strlen(newCmd)-1] = '\0'; 
+        if(strlen(newCmd) > 0)
         {
-            all_commands.push_back(newCmd);
-        }
+            parse_cmd_line(newCmd,cmds,0);
+    
+            if(execute_cmd(cmds,0) > 0)
+            {
+                all_commands.push_back(newCmd);
+            }
+        }    
 
+        all_pids.clear();
         reset_commands(cmds);
         
     }
@@ -200,6 +217,11 @@ int execute_cmd(Commands* commands,int index)
                         mul_ls(commands,index);
                         
                     }
+                    else
+                    {
+                        all_pids.push_back(pid);
+                    }
+                    
                 }
                 else
                 {
@@ -247,6 +269,10 @@ int execute_cmd(Commands* commands,int index)
                         history();
                         
                     }
+                    else
+                    {
+                        all_pids.push_back(pid);
+                    }
                 }
                 else
                 {
@@ -263,14 +289,17 @@ int execute_cmd(Commands* commands,int index)
                     pid = fork();
                     if(pid == 0)
                     {
-                                            
+                                           
                         redirection(fd,redirect_type,commands);  
                         
                         char filename[MAX_LENGTH] = {'\0'};
                         strncpy(filename,commands->cmds[index]->argument[2],strlen(commands->cmds[index]->argument[2]));
                         find(commands->cmds[index]->argument[0],filename);
                         
-
+                    }
+                    else
+                    {
+                        all_pids.push_back(pid);
                     }
                 }
                 else
@@ -294,7 +323,17 @@ int execute_cmd(Commands* commands,int index)
                     }
                     else
                     {
-                       find(commands->cmds[index]->argument[0],filename);
+                        pid = fork();
+                        if(pid == 0)
+                        {
+                            find(commands->cmds[index]->argument[0],filename);
+                        }
+                        else
+                        {
+                            all_pids.push_back(pid);
+                        }
+                       
+                       
                     }
                     
                     
@@ -307,7 +346,9 @@ int execute_cmd(Commands* commands,int index)
 
         if((pid > 0) && (backen != 1))
         {
+
             waitpid(pid,nullptr,0);
+
         }
         
         
@@ -349,6 +390,9 @@ int execute_cmd(Commands* commands,int index)
 
         close(fds[0]);
         close(fds[1]);
+
+        all_pids.push_back(pid_1);
+        all_pids.push_back(pid_2);
 
         waitpid(pid_1,nullptr,0);
         waitpid(pid_2,nullptr,0);
