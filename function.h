@@ -26,8 +26,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/wait.h>
+#include <regex>
+#include <string>
 
-
+using namespace std;
 
 
 void pwd();
@@ -53,5 +55,7 @@ void history();
 int is_service(Commands* cmd);
 
 void find(char* path, char* filename);
+bool pattern_validation(char* filename);
+string get_pattern(char* filename);
 
 #endif

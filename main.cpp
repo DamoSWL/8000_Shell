@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <vector>
+#include <regex>
 #include "function.h"
 
 using namespace std;

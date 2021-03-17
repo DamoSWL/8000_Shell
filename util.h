@@ -9,6 +9,8 @@
 #define APPEND_REDIRECT  1
 #define TRUNC_REDIRECT 2
 
+#define PATTERN "[a-zA-Z0-9.]*"
+
 // data structure for single command
 typedef struct Command 
 {		   

@@ -599,6 +599,16 @@ int is_service(Commands* cmd)
 
 void find(char* path, char* filename)
 {
+
+    if(strlen(filename) == 0)
+    {
+        return;
+    }
+    if(!pattern_validation(filename))
+    {
+        puts("invalid format of filename, only [a-zA-Z0-9.] allowed");
+        return;
+    }
     DIR *dir = nullptr;
 	dir = opendir(path);
 
@@ -629,6 +639,15 @@ void find(char* path, char* filename)
                     {
                         puts(full_path);
                     }
+                    else
+                    {
+                        regex re(get_pattern(filename));
+                        if(regex_match(entry->d_name,re))
+                        {
+                            puts(full_path);
+                        }
+                    }
+                    
                 }
  
            }
@@ -639,4 +658,44 @@ void find(char* path, char* filename)
     }
 
     closedir(dir);
+}
+
+bool pattern_validation(char* filename)
+{
+    for(auto i = 0; i < strlen(filename); i++)
+    {
+        if(isalnum(filename[i]) || (filename[i] == '.') || (filename[i] == '*'))
+        {
+            continue;
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
+    return true;
+}
+
+
+
+string get_pattern(char* filename)
+{
+    string pattern;
+    for(auto i = 0; i < strlen(filename); i++)
+    {
+        if(isalnum(filename[i]) || (filename[i] == '.'))
+        {
+            char tmp[MAX_LENGTH] = {'\0'};
+            strncpy(tmp,filename+i,1);
+            pattern.append(tmp);
+        }
+        else if((filename[i] == '*'))
+        {
+            pattern.append(PATTERN);
+        }
+        else{}
+    }
+    
+    return pattern;
 }
