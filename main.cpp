@@ -82,7 +82,7 @@ int init_shell_path()
 
 void print_prefix()
 {
-    char* user = getenv("USER");
+    char* user = secure_getenv("USER");
     char* directory = get_current_dir_name();
 
     char prefix[MAX_LENGTH] = {'\0'};
@@ -115,6 +115,7 @@ int main(int argc, char* argv[])
 
     if(init_shell_path() < 0)
     {
+        delete[] cmds;
         return -1;
     }
 

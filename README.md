@@ -41,6 +41,7 @@ find path -name filename
 for example,
 ```bash
 find . -name a.txt
+find . -name *.txt
 ```
 
 File Redirection(>,>>,<):
@@ -59,6 +60,15 @@ History:
 ```bash
 history
 ```
+
+Pipeline
+```bash
+ls | pwd
+```
+
+Interrupt(Ctrl+C)
+
+
 
 ## Programming Language used
 C++

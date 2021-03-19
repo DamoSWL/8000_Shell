@@ -404,7 +404,17 @@ void mul_ls(Commands* commands,int index)
             {
                 char extension[MAX_LENGTH] = {'\0'};
                 strncpy(extension,commands->cmds[index]->argument[1]+2,strlen(commands->cmds[index]->argument[1])-2);
-                ls_with_file_type(extension);  //execute ls --file-type extension
+                if(strlen(extension) > 2)
+                {
+                    ls_with_file_type(extension);  //execute ls --file-type extension
+                }
+                else
+                {
+                    puts("invalid format of file extension");
+                    return;
+                }
+                
+                
             }
             else
             {
