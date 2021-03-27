@@ -82,11 +82,15 @@ int init_shell_path()
 
 void print_prefix()
 {
-    char* user = secure_getenv("USER");
+
+
+    char* user = secure_getenv("USER");  //change from getnev
+
+
     char* directory = get_current_dir_name();
 
     char prefix[MAX_LENGTH] = {'\0'};
-    snprintf(prefix,MAX_LENGTH,"%s@%s:%s$ ",user,"localhost",directory);
+    snprintf(prefix,MAX_LENGTH,"%s@%s:%s$ ",user,"localhost",directory);  //change from sprintf
     write(STDOUT_FILENO,prefix,strlen(prefix));
     
 
@@ -115,7 +119,9 @@ int main(int argc, char* argv[])
 
     if(init_shell_path() < 0)
     {
-        delete[] cmds;
+        delete[] cmds;  //release the memory according to bug report
+
+
         return -1;
     }
 

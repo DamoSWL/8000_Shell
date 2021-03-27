@@ -296,7 +296,7 @@ void ls_with_s_filename(const char* filename)
 
     char buf[MAX_LENGTH] = {'\0'};
 
-    snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);//here
+    snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);// change from sprintf
     puts(buf);
 }
 
@@ -404,7 +404,8 @@ void mul_ls(Commands* commands,int index)
             {
                 char extension[MAX_LENGTH] = {'\0'};
                 strncpy(extension,commands->cmds[index]->argument[1]+2,strlen(commands->cmds[index]->argument[1])-2);
-                if(strlen(extension) > 2)
+               
+                if(strlen(extension) > 2)  //add the verification for the length of extension
                 {
                     ls_with_file_type(extension);  //execute ls --file-type extension
                 }
