@@ -1,0 +1,69 @@
+From 5552f0662e9dae2e9fb514c37f151d13e44bb7bb Mon Sep 17 00:00:00 2001
+From: damoswl <damoswl@foxmail.com>
+Date: Sat, 27 Mar 2021 16:06:53 -0400
+Subject: [PATCH] fix the bug according to the bug report (from issue 56 to 63)
+
+---
+ function.cpp |  5 +++--
+ main.cpp     | 12 +++++++++---
+ 2 files changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/function.cpp b/function.cpp
+index 38663cb..165e795 100644
+--- a/function.cpp
++++ b/function.cpp
+@@ -296,7 +296,7 @@ void ls_with_s_filename(const char* filename)
+ 
+     char buf[MAX_LENGTH] = {'\0'};
+ 
+-    snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);//here
++    snprintf(buf,MAX_LENGTH,"%ld\t%s",st.st_blocks,filename+2);// change from sprintf
+     puts(buf);
+ }
+ 
+@@ -404,7 +404,8 @@ void mul_ls(Commands* commands,int index)
+             {
+                 char extension[MAX_LENGTH] = {'\0'};
+                 strncpy(extension,commands->cmds[index]->argument[1]+2,strlen(commands->cmds[index]->argument[1])-2);
+-                if(strlen(extension) > 2)
++               
++                if(strlen(extension) > 2)  //add the verification for the length of extension
+                 {
+                     ls_with_file_type(extension);  //execute ls --file-type extension
+                 }
+diff --git a/main.cpp b/main.cpp
+index e57bfda..fa35364 100644
+--- a/main.cpp
++++ b/main.cpp
+@@ -82,11 +82,15 @@ int init_shell_path()
+ 
+ void print_prefix()
+ {
+-    char* user = secure_getenv("USER");
++
++
++    char* user = secure_getenv("USER");  //change from getnev
++
++
+     char* directory = get_current_dir_name();
+ 
+     char prefix[MAX_LENGTH] = {'\0'};
+-    snprintf(prefix,MAX_LENGTH,"%s@%s:%s$ ",user,"localhost",directory);
++    snprintf(prefix,MAX_LENGTH,"%s@%s:%s$ ",user,"localhost",directory);  //change from sprintf
+     write(STDOUT_FILENO,prefix,strlen(prefix));
+     
+ 
+@@ -115,7 +119,9 @@ int main(int argc, char* argv[])
+ 
+     if(init_shell_path() < 0)
+     {
+-        delete[] cmds;
++        delete[] cmds;  //release the memory according to bug report
++
++
+         return -1;
+     }
+ 
+-- 
+2.17.1
+
