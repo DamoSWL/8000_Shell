@@ -119,9 +119,8 @@ int main(int argc, char* argv[])
 
     if(init_shell_path() < 0)
     {
+        delete [] newCmd;
         delete[] cmds;  //release the memory according to bug report
-
-
         return -1;
     }
 
